@@ -1,0 +1,111 @@
+====================================================================
+  PROMPTS TO TRY — Agentic AI Predictive Maintenance
+====================================================================
+
+--------------------------------------------------------------------
+🟢 BASIC — does the tool get called at all?
+--------------------------------------------------------------------
+Start here. These confirm your model is wired correctly.
+
+Prompt 1:
+  Machine type M, air temp 302K, process temp 311K, 1450 rpm,
+  55 Nm torque, 200 min tool wear. Will it fail?
+
+Prompt 2:
+  Check this machine: Type L, 298K air, 309K process,
+  1600 rpm, 40 Nm, 50 min wear.
+
+What to check:
+  The agent should call predict_machine_failure automatically
+  and return a probability + priority. If it just answers in
+  general terms without calling the tool, the tool description
+  needs to be clearer.
+
+
+--------------------------------------------------------------------
+🟡 MEDIUM — agent needs to reason, not just call the tool
+--------------------------------------------------------------------
+
+Prompt 3:
+  Our machine has been running for 3 shifts non-stop.
+  Tool wear is at 180 minutes, torque is 52 Nm and temperatures
+  are creeping up — air is 301K, process is 310K.
+  It's a Type M machine at 1480 rpm.
+  Do we stop it tonight or can it run one more shift?
+
+Prompt 4:
+  Compare these two machines and tell me which one to prioritize:
+  Machine A: Type H, 300K air, 310K process, 1500 rpm, 48 Nm, 150 min wear
+  Machine B: Type L, 299K air, 309K process, 1550 rpm, 38 Nm, 20 min wear
+
+What to check:
+  The agent should call the tool for each machine, compare
+  probabilities, and give a clear "prioritize A over B" answer
+  with a reason.
+
+
+--------------------------------------------------------------------
+🔴 HARD — tests edge cases and reasoning limits
+--------------------------------------------------------------------
+
+Prompt 5:
+  What happens if tool wear reaches 250 minutes on a Type H
+  machine running at high torque (60 Nm)?
+
+Prompt 6:
+  Our sensor data looks wrong — the process temperature is
+  showing 350K which seems too high. Can you still predict failure?
+
+Prompt 7:
+  I have 10 machines all running at similar conditions.
+  How should I decide which ones to inspect first?
+
+What to check:
+  The agent should handle unusual values gracefully, acknowledge
+  uncertainty when sensor data looks wrong, and give practical
+  prioritization logic rather than just running the tool blindly.
+
+
+--------------------------------------------------------------------
+🧠 CONVERSATIONAL MEMORY TEST
+--------------------------------------------------------------------
+Send these ONE MESSAGE AT A TIME in the same session.
+
+Message 1:
+  Our Type M machine at 1450 rpm just threw a torque spike to 58 Nm.
+
+Message 2:
+  Air temp is 303K, process temp 312K, tool wear at 170 min.
+
+Message 3:
+  Based on all that, should I shut it down?
+
+What to check:
+  On message 3, the agent should remember messages 1 and 2
+  without you repeating them. If it asks "what machine?" it means
+  memory (RunnableWithMessageHistory) is not wired up yet.
+
+
+--------------------------------------------------------------------
+WHAT TO LOOK FOR
+--------------------------------------------------------------------
+✅ Agent calls the tool automatically
+     → Tool is wired correctly
+
+✅ Agent explains the probability in plain English
+     → System prompt is working
+
+✅ Agent asks for missing info before predicting
+     → It's reasoning, not just pattern matching
+
+❌ Agent gives same answer regardless of inputs
+     → Tool might not be getting called
+
+❌ "columns are missing" error
+     → Re-check the DataFrame in the tool
+       Add: TWF=0, HDF=0, PWF=0, OSF=0, RNF=0
+
+❌ Agent asks "what machine?" on message 3 of memory test
+     → RunnableWithMessageHistory not wired up
+
+====================================================================
